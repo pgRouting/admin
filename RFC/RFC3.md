@@ -4,7 +4,7 @@
 | --- | ---
 | RFC 3 | Handling releases and branches on pgRouting
 | Author(s) | Vicky Vergara
-| Status | Waiting for feedback
+| Status | Adopted
 | Date | October 24, 2018
 
 Table of Contents
