@@ -133,41 +133,44 @@ References
 
 ## Releases plan
 
-- Every 2 years have a **Major** release
+- Every `N` months have a **Major** release
+- the value `N` would be determinded by circumstances
   - _Proposed_ functions moves up to **official**
   - _experimental_ functions moves up to **official**
   - _Proposed_ functions moves down to _experimental_
   - _experimental_ functions moves up to _Proposed_
   - Remove deprecated functions
-- Every 6 months (March, September, March) within the 2 years have a **Minor** release
+- Every `N / 4` months within the `N` years have a **Minor** release
   - _experimental_ functions moves up to _Proposed_
   - _Proposed_ functions moves down to _experimental_
   - add new _experimental_ or _Proposed_ functions
   - Deprecate functions
-- March releases:
-  - Adds GSoC previous year functions as _experimental_ depending on quality
-    - This gives 6 months to students to improve quality
+- Even minor releases:
+  - Adds GSoC functions as _experimental_ depending on quality
 - Once a Major release is out, support for previous release is done on the last minor-patch
 - Supporting releases is done only to the last 2 Majors, only in the last micro-patch for bug fixes on the official functions
 
-### Proposed dates:
+
+### For example If N = 48 months
+
+Suppose that v3.0.0 is released on September 2019
+Then the releases plan for v4.0.0 could be:
 
 | Release | kind | release date | patch support ends
 | ---- | ------ | ------- | ----------
-| v 2.6.1 | minor | - | September 2021
 | v3.0.0 | Major | September 2019 | September 2021
 | v3.1.0 | Minor | March 2020 | September 2021
 | v3.2.0 | Minor | September 2020 | September 2021
 | v3.3.0 | Last Minor of v3| March 2021 | September 2023
 | v4.0.0 | Major | September 2021 | No longer patch support to Major v2.<last minor> on official functions
-| v5.0.0 | Major | September 2023 | No longer patch support to Major v3.<last minor> on official functions
 
-| Version | release | patch support on official functions ends
+
+| Version | release | patch support on official functions would end on
 | ---- | ------ | -------
 | 2 | September 2013 | September 2021
 | 3 | September 2019 | September 2023
-| 4 | September 2021 | September 2025
-| 5 | September 2023 | September 2027
+
+
 
 
 ## Branches
