@@ -21,7 +21,6 @@ Table of Contents
       * [These calls are invalid:](#these-calls-are-invalid)
    * [Developers steps to take:](#developers-steps-to-take)
 
-
 # Summary
 
 This document proposes how to proceed on:
@@ -31,7 +30,9 @@ This document proposes how to proceed on:
 Enforcing from: pgRouting version 3.0
 
 # Details
+
 ## PostgreSQL
+
 PostgreSQL provides:
 - Positional notation
   - a function call is written with its argument values in the same order as they are defined in the function declaration
@@ -44,17 +45,19 @@ PostgreSQL provides:
 Starting from PostgreSQL v9.4 the named notation is with `=>` instead of `:=` and
 PostgreSQL v9.3 end of life is on November 8, 2018
 
+**References**
 
-**references**
 * https://www.postgresql.org/docs/current/static/sql-syntax-calling-funcs.html
 * https://www.postgresql.org/support/versioning
 
 # pgRouting
 
 The majority of pgRouting functions have the following structure:
+
 ```
 pgr_<function_name>(<edges_sql>, [<other_sql>], start_vid(s), end_vid(s), <optional_parameters>)
 ```
+
 also most of our functions have optional parameters
 
 ## Proposal:
@@ -63,12 +66,16 @@ also most of our functions have optional parameters
 - Use named parameters on the optional parameters
 
 ## With this proposal, from the user point of view
+
 For this signatures
+
 ```
 pgr_aStar(edges_sql, from_vid,  to_vid  [, directed] [, heuristic] [, factor] [, epsilon])
 pgr_aStar(edges_sql, from_vid,  to_vids [, directed] [, heuristic] [, factor] [, epsilon])
 ```
+
 Where the defaults of the optional parameters are:
+
 ```
 directed => true
 heuristic => 5
@@ -81,37 +88,45 @@ epsilon => 1
 **Example 1** The optional parameters have their default value
 
 Automatically its the "One to One" signature
-```
+
+```sql
 SELECT * FROM pgr_aStar(
     'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
     2, 12);
 ```
+
 **Example 2** The optional parameter `directed` can be used with positional notation
 
 Automatically its the "One to Many" signature
-```
+
+```sql
 SELECT * FROM pgr_aStar(
     'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
     2, ARRAY[3, 12], true, heuristic => 2);
 ```
 
 **Example 3** The optional parameter `directed` of position 4 is skipped using the default value `true`
+
 ```
 SELECT * FROM pgr_aStar(
     'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
     2, ARRAY[3, 12], heuristic => 2);
 ```
+
 **Example 4** The optional parameters `directed` and `heuristic` changed position
-```
+
+```sql
 SELECT * FROM pgr_aStar(
     'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
     2, ARRAY[3, 12], heuristic => 2, directed => false);
 ```
 ### These calls are invalid:
+
 **Example 5** Mix compulsory parameters with optional parameters
 
 Compare with example 4:
-```
+
+```sql
 SELECT * FROM pgr_aStar(
     directed => false, to_vids => ARRAY[3, 12], heuristic => 2,
     edges_sql => 'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
@@ -121,26 +136,29 @@ SELECT * FROM pgr_aStar(
 **Example 6** Over use of named parameters
 
 Compare with example 1
-```
+
+```sql
 SELECT * FROM pgr_aStar(
     edges_sql => 'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
     from_vid => 2, to_vids => ARRAY[3, 12]);
 ```
+
 **Example 7** Difficult to debug
-```
+
+```sql
 SELECT * FROM pgr_aStar(
     edges_sql => 'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
     from_vid => 2, to_vid => ARRAY[3, 12], directed => true, heuristic => 2);
 ```
+
 Error: The user is has a contradiction:
 `from_vid, to_vid` combination is for the "One to One" signature But is using ARRAY that belongs to the "One to Many" signature.
-
-
 
 ## Developers steps to take:
 
 Taking as example:
-```
+
+```sql
 CREATE OR REPLACE FUNCTION pgr_aStarCost(
     edges_sql TEXT,
     start_vid BIGINT,
@@ -164,14 +182,15 @@ LANGUAGE sql VOLATILE STRICT
 COST 100
 ROWS 1000;
 ```
-**Note:** Internally its not using names, because of name collision of the input parameters with the output parameters.
 
-```
+**Note:** Internally its not using names, because of name collision of the input parameters with the output parameters. Add comments with further explanation of required parameters
+
+```sql
 CREATE OR REPLACE FUNCTION pgr_aStarCost(
     ---------------- remove the names on compulsory parameters
-    TEXT,
-    BIGINT,
-    BIGINT,
+    TEXT,   -- edges_sql (required)
+    BIGINT, -- start_vid (required)
+    BIGINT, -- end_vid (required)
     directed BOOLEAN DEFAULT true,
     heuristic INTEGER DEFAULT 5,
     factor FLOAT DEFAULT 1.0,
@@ -192,11 +211,3 @@ LANGUAGE sql VOLATILE STRICT
 COST 100
 ROWS 1000;
 ```
-
-
-
-
-
-
-
-
