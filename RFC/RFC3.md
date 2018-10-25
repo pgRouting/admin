@@ -7,21 +7,20 @@
 | Status | Adopted
 | Date | October 24, 2018
 
-Table of Contents
-=================
+## Table of Contents
 
 * [pgRouting RFC 3: Positional and named parameters on pgRouting functions](#pgrouting-rfc-3-positional-and-named-parameters-on-pgrouting-functions)
 * [Summary](#summary)
 * [Details](#details)
-   * [PostgreSQL](#postgresql)
+  * [PostgreSQL](#postgresql)
 * [pgRouting](#pgrouting)
-   * [Proposal:](#proposal)
-   * [With this proposal, from the user point of view](#with-this-proposal-from-the-user-point-of-view)
-      * [These calls are valid:](#these-calls-are-valid)
-      * [These calls are invalid:](#these-calls-are-invalid)
-   * [Developers steps to take:](#developers-steps-to-take)
+  * [Proposal:](#proposal)
+  * [With this proposal, from the user point of view](#with-this-proposal-from-the-user-point-of-view)
+    * [These calls are valid](#these-calls-are-valid)
+    * [These calls are invalid](#these-calls-are-invalid)
+  * [Developers steps to take:](#developers-steps-to-take)
 
-# Summary
+## Summary
 
 This document proposes how to proceed on:
 
@@ -29,61 +28,62 @@ This document proposes how to proceed on:
 
 Enforcing from: pgRouting version 3.0
 
-# Details
+## Details
 
-## PostgreSQL
+### PostgreSQL
 
 PostgreSQL provides:
-- Positional notation
-  - a function call is written with its argument values in the same order as they are defined in the function declaration
-- Named notation
-  - the arguments are matched to the function parameters by name and can be written in any order
-- Mixed notation
-  - which combines positional and named notation.
-  - The positional parameters are written first and named parameters appear after them.
+
+* Positional notation
+  * a function call is written with its argument values in the same order as they are defined in the function declaration
+* Named notation
+  * the arguments are matched to the function parameters by name and can be written in any order
+* Mixed notation
+  * which combines positional and named notation.
+  * The positional parameters are written first and named parameters appear after them.
 
 Starting from PostgreSQL v9.4 the named notation is with `=>` instead of `:=` and
 PostgreSQL v9.3 end of life is on November 8, 2018
 
-**References**
+#### References
 
-* https://www.postgresql.org/docs/current/static/sql-syntax-calling-funcs.html
-* https://www.postgresql.org/support/versioning
+* [PostgreSQL - Calling Functions](https://www.postgresql.org/docs/current/static/sql-syntax-calling-funcs.html)
+* [PostgreSQL - Versioning](https://www.postgresql.org/support/versioning)
 
-# pgRouting
+## pgRouting
 
 The majority of pgRouting functions have the following structure:
 
-```
+```sql
 pgr_<function_name>(<edges_sql>, [<other_sql>], start_vid(s), end_vid(s), <optional_parameters>)
 ```
 
-also most of our functions have optional parameters
+Also most of our functions have optional parameters
 
-## Proposal:
+### Proposal
 
-- Use positional parameters on the compulsory parameters
-- Use named parameters on the optional parameters
+* Use positional parameters on the compulsory parameters
+* Use named parameters on the optional parameters
 
-## With this proposal, from the user point of view
+### With this proposal, from the user point of view
 
-For this signatures
+For these signatures
 
-```
+```sql
 pgr_aStar(edges_sql, from_vid,  to_vid  [, directed] [, heuristic] [, factor] [, epsilon])
 pgr_aStar(edges_sql, from_vid,  to_vids [, directed] [, heuristic] [, factor] [, epsilon])
 ```
 
 Where the defaults of the optional parameters are:
 
-```
+```sql
 directed => true
 heuristic => 5
 factor => 1
 epsilon => 1
 ```
 
-### These calls are valid:
+#### These calls are valid
 
 **Example 1** The optional parameters have their default value
 
@@ -107,7 +107,7 @@ SELECT * FROM pgr_aStar(
 
 **Example 3** The optional parameter `directed` of position 4 is skipped using the default value `true`
 
-```
+```sql
 SELECT * FROM pgr_aStar(
     'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
     2, ARRAY[3, 12], heuristic => 2);
@@ -120,7 +120,8 @@ SELECT * FROM pgr_aStar(
     'SELECT id, source, target, cost, reverse_cost, x1, y1, x2, y2 FROM edge_table',
     2, ARRAY[3, 12], heuristic => 2, directed => false);
 ```
-### These calls are invalid:
+
+#### These calls are invalid
 
 **Example 5** Mix compulsory parameters with optional parameters
 
@@ -154,7 +155,7 @@ SELECT * FROM pgr_aStar(
 Error: The user is has a contradiction:
 `from_vid, to_vid` combination is for the "One to One" signature But is using ARRAY that belongs to the "One to Many" signature.
 
-## Developers steps to take:
+### Developers steps to take
 
 Taking as example:
 
