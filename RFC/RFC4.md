@@ -89,7 +89,7 @@ References:
 ### Major releases
 
 * Purpose:
-  * Major changes (API break) at QGIS Python API (i.e. Migration from QGIS 2 to QGIS 3).
+  * Major changes (API breaks) at QGIS Python API (i.e. Migration from QGIS 2 to QGIS 3).
   * Upgrade to pgRouting major release.
 * Commits: As many as needed
 * No back porting is performed.
